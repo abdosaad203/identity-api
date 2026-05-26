@@ -1,0 +1,20 @@
+name: Identity API CI
+
+on:
+  push:
+    branches:
+      - main
+      - stage
+
+  workflow_dispatch:
+
+jobs:
+  call-reusable-workflow:
+    uses: abdosaad203/reusable-backend-ci/.github/workflows/backend-ci.yml@main
+
+    with:
+      dotnet-version: '10.0.x'
+      project-path: 'Identity.API/Identity.API.csproj'
+      test-path: 'Identity.API.Tests/Identity.API.Tests.csproj'
+      run-tests: true
+      image-name: 'identity-api'
