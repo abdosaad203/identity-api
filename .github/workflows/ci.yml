@@ -8,6 +8,10 @@ on:
 
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   call-reusable-workflow:
     uses: abdosaad203/reusable-backend-ci/.github/workflows/backend-ci.yml@main
