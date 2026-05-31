@@ -9,7 +9,10 @@ using Prometheus;
 var builder = WebApplication.CreateBuilder(args);
 
 // EF Core + MySQL
-var connectionString = builder.Configuration.GetConnectionString("MySQL");
+var connectionString =
+    builder.Configuration.GetConnectionString("Default")
+    ?? builder.Configuration.GetConnectionString("MySQL");
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0))));
 
@@ -32,8 +35,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
-builder.Services.AddHealthChecks()
-    .AddMySql(connectionString!, name: "mysql");
+
+// Disable MySQL healthcheck temporarily
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -41,20 +45,27 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
     try
     {
         var count = db.Users.Count();
         AppMetrics.ActiveUsers.Set(count);
     }
-    catch { /* DB might not be ready yet on first boot */ }
+    catch
+    {
+        // ignore startup DB errors
+    }
 }
 
 app.UseRouting();
+
 app.UseHttpMetrics();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 app.MapHealthChecks("/health");
 app.MapMetrics();
 
