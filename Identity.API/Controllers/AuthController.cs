@@ -27,7 +27,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterRequest req)
     {
         if (string.IsNullOrWhiteSpace(req.Username) || string.IsNullOrWhiteSpace(req.Email) || string.IsNullOrWhiteSpace(req.Password))
-            return BadRequest(new { message = "Username, email, and password are required.v2" });
+            return BadRequest(new { message = "Username, email, and password are required." });
 
         if (await _db.Users.AnyAsync(u => u.Username == req.Username || u.Email == req.Email))
             return Conflict(new { message = "Username or email already exists." });
